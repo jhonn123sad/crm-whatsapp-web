@@ -2,13 +2,13 @@
 html.crmw-open #app { width: calc(100% - 360px) !important; }
 html.crmw-open #app > div { width: 100% !important; }
 /* ===== Temas: html[data-crmw-theme=light|dark] x html[data-crmw-style=whatsapp|apple] ===== */
-#crmw, #crmw-bar { --acc: #00a884; --acc-d: #008069; --acc-l: #d9fdd3; --line: #e9edef; --mut: #667781; --bg: #fff; --bg2: #f0f2f5; --txt: #111b21; --warn: #b45309;
+#crmw, #crmw-bar, #crmw-listbar { --acc: #00a884; --acc-d: #008069; --acc-l: #d9fdd3; --line: #e9edef; --mut: #667781; --bg: #fff; --bg2: #f0f2f5; --txt: #111b21; --warn: #b45309;
   --r: 12px; --font: "Segoe UI", Helvetica, Arial, sans-serif; --shadow: 0 1px 2px #0000000d; --glass: #fffffff2; }
-html[data-crmw-theme=dark] #crmw, html[data-crmw-theme=dark] #crmw-bar { --line: #2a3942; --mut: #8696a0; --bg: #111b21; --bg2: #0b141a; --txt: #e9edef; --acc-l: #005c4b; --acc-d: #21c063; --warn: #fbbf24; --glass: #202c33f2; }
+html[data-crmw-theme=dark] #crmw, html[data-crmw-theme=dark] #crmw-bar, html[data-crmw-theme=dark] #crmw-listbar { --line: #2a3942; --mut: #8696a0; --bg: #111b21; --bg2: #0b141a; --txt: #e9edef; --acc-l: #005c4b; --acc-d: #21c063; --warn: #fbbf24; --glass: #202c33f2; }
 /* estilo Apple: cores do sistema (HIG), fonte do sistema, cantos maiores e vidro fosco */
-html[data-crmw-style=apple] #crmw, html[data-crmw-style=apple] #crmw-bar { --acc: #007aff; --acc-d: #0062cc; --acc-l: #e5f1ff; --line: #e5e5ea; --mut: #8e8e93; --bg: #fff; --bg2: #f2f2f7; --txt: #000;
+html[data-crmw-style=apple] #crmw, html[data-crmw-style=apple] #crmw-bar, html[data-crmw-style=apple] #crmw-listbar { --acc: #007aff; --acc-d: #0062cc; --acc-l: #e5f1ff; --line: #e5e5ea; --mut: #8e8e93; --bg: #fff; --bg2: #f2f2f7; --txt: #000;
   --r: 16px; --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable", "Segoe UI", Inter, Roboto, sans-serif; --shadow: 0 1px 3px #0000000f, 0 0 0 .5px #0000000a; --glass: #fffc; }
-html[data-crmw-style=apple][data-crmw-theme=dark] #crmw, html[data-crmw-style=apple][data-crmw-theme=dark] #crmw-bar { --acc: #0a84ff; --acc-d: #409cff; --acc-l: #0a84ff2e; --line: #38383a; --mut: #98989f; --bg: #1c1c1e; --bg2: #000; --txt: #fff; --glass: #1c1c1ecc; }
+html[data-crmw-style=apple][data-crmw-theme=dark] #crmw, html[data-crmw-style=apple][data-crmw-theme=dark] #crmw-bar, html[data-crmw-style=apple][data-crmw-theme=dark] #crmw-listbar { --acc: #0a84ff; --acc-d: #409cff; --acc-l: #0a84ff2e; --line: #38383a; --mut: #98989f; --bg: #1c1c1e; --bg2: #000; --txt: #fff; --glass: #1c1c1ecc; }
 #crmw { font: 14px/1.45 var(--font); color: var(--txt); }
 #crmw *, #crmw-bar * { box-sizing: border-box; }
 
@@ -351,3 +351,21 @@ html.crmw-blurHeader #main header:hover { filter: none; }
   .crmw-bprimary { width: 32px; padding: 0; justify-content: center; font-size: 16px; }
   .crmw-bchip { max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
 }
+
+/* botão "Voltar para Contatos/Kanban" */
+#crmw-return { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 2147483001; display: none; align-items: center; background: var(--acc); border-radius: 22px; box-shadow: 0 6px 20px #0004; overflow: hidden; }
+#crmw-return.on { display: flex; animation: crmw-up .2s ease-out; }
+#crmw-return button { border: 0; background: none; color: #fff; font: 600 13.5px var(--font); padding: 10px 14px; cursor: pointer; }
+#crmw-return button[data-r=x] { padding: 10px 12px 10px 4px; opacity: .8; }
+#crmw-return button:hover { background: #ffffff1f; }
+
+
+/* ===== filtros no topo da lista de conversas ===== */
+#crmw-listbar { position: sticky; top: 0; z-index: 5; display: flex; gap: 6px; padding: 8px 12px; overflow-x: auto; scrollbar-width: none; background: var(--bg); border-bottom: 1px solid var(--line); font: 13px var(--font); }
+#crmw-listbar::-webkit-scrollbar { display: none; }
+#crmw-listbar button { --c: var(--mut); flex: none; display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 11px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); color: var(--txt); cursor: pointer; font: inherit; white-space: nowrap; }
+#crmw-listbar button:hover { border-color: var(--acc); }
+#crmw-listbar button i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+#crmw-listbar button em { font-style: normal; font-size: 11px; color: var(--mut); }
+#crmw-listbar button.on { background: color-mix(in srgb, var(--acc) 14%, transparent); border-color: var(--acc); color: var(--acc-d); font-weight: 600; }
+#crmw-listbar button.on em { color: inherit; }

@@ -8,7 +8,7 @@
   let open = localStorage.getItem('crmw-open') !== '0';
   let view = 'cliente', sub = null;      // sub: página dentro de Ferramentas
   let loaded = false, waReady = false;
-  let contacts = null, contactsQuery = '', groups = null, listFilter = null;
+  let contacts = null, contactsQuery = '', groups = null;
   const picked = new Set();
   const checkedAds = new Set();
   const listeners = { data: [], chat: [], message: [] };
@@ -121,7 +121,7 @@
     if (lead && c && (lead.name !== c.name || (c.phone && !lead.phone) || (c.chatId && !lead.chatId))) {
       saveLead({ key: lead.key, name: c.name, phone: lead.phone || c.phone, chatId: lead.chatId || c.chatId });
     }
-    if (c) { view = 'cliente'; sub = null; }
+    // não troca a aba sozinho: quem está em "Hoje" ou numa lista continua no mesmo lugar
     closeSheet();
     render();
     listeners.chat.forEach((f) => f(c));
@@ -161,6 +161,7 @@
     if (!f.src) f.src = chrome.runtime.getURL('board.html?embed=1#funil');
     else sendThemeToBoard();
     root.querySelector('#crmw-kanban').classList.add('on');
+    hideReturn();
   }
   // o Kanban embutido segue o mesmo tema do painel
   function sendThemeToBoard() {
@@ -174,7 +175,7 @@
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeKanban(); closeSheet(); } });
   window.addEventListener('message', (e) => {
     if (e.origin !== new URL(chrome.runtime.getURL('')).origin || e.data?.crmw !== 'board') return;
-    if (e.data.action === 'openChat') { closeKanban(); openLead(e.data.lead); }
+    if (e.data.action === 'openChat') { closeKanban(); openLead(e.data.lead); showReturn('Kanban', openKanban); }
   });
 
   const BLUR = ['blurMsgs', 'blurList', 'blurPreview', 'blurPhotos', 'blurHeader'];
@@ -212,6 +213,17 @@
       : w.hideDoodles ? `${doodles} { display: none !important; }` : '';
   }
   applyPrefs();
+
+  // botão flutuante para voltar exatamente onde estava (Kanban / Contatos) depois de abrir uma conversa
+  function showReturn(label, reopen) {
+    let b = root.querySelector('#crmw-return');
+    if (!b) { b = document.createElement('div'); b.id = 'crmw-return'; root.appendChild(b); }
+    b.innerHTML = `<button data-r="go">↩ Voltar para ${esc(label)}</button><button data-r="x" title="Fechar">✕</button>`;
+    b.classList.add('on');
+    b.querySelector('[data-r=go]').onclick = () => { b.classList.remove('on'); reopen(); };
+    b.querySelector('[data-r=x]').onclick = () => b.classList.remove('on');
+  }
+  function hideReturn() { root.querySelector('#crmw-return')?.classList.remove('on'); }
 
   function toast(t) { const el = root.querySelector('#crmw-toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 3200); }
 
@@ -361,8 +373,14 @@
 
   // ---------- painel ----------
   const NAV = [['cliente', '👤', 'Cliente'], ['hoje', '📅', 'Hoje'], ['ferramentas', '🧰', 'Ferramentas']];
+  // redesenhar não pode jogar a rolagem para o topo: guarda a posição por aba
+  const scrollPos = {};
   function render() {
+    const where = view + '/' + (sub || '');
+    if (main.dataset.where) scrollPos[main.dataset.where] = main.scrollTop;
     try { draw(); } catch (e) { main.textContent = 'Erro no CRM: ' + e.message; console.error('[CRM]', e); }
+    main.dataset.where = where;
+    main.scrollTop = scrollPos[where] || 0;
   }
   function todayItems() {
     const t0 = new Date(); t0.setHours(23, 59, 59, 999);
@@ -535,6 +553,8 @@
     const item = (icon, title, sub, attrs, extra = '') => `<button class="crmw-li crmw-click" ${attrs}><span>${icon}</span><div><b>${title}</b>${sub ? `<p>${sub}</p>` : ''}</div>${extra}</button>`;
     const leadByChat = (chatId) => leads.find((l) => l.chatId === chatId) || { chatId, name: '' };
     const empty = !T.followUps.length && !T.reminders.length && !T.scheduled.length;
+    const lf = globalThis.CRMW.listFilter || '';
+    const listFilter = lf === 'funnel' ? 'leads' : lf === 'source:Anúncio' ? 'anuncio' : lf.startsWith('stage:') ? lf.slice(6) : lf;
     body.innerHTML = `<div class="crmw-stats">${data.stages.map((s) => `<button data-filter="${s.id}" class="${listFilter === s.id ? 'on' : ''}" title="Mostrar só estes na lista do WhatsApp"><b style="color:${s.color}">${leads.filter((l) => l.stage === s.id).length}</b><span>${esc(s.name)}</span></button>`).join('')}</div>
       <div class="crmw-filterbar">Mostrar na lista do WhatsApp: <button data-filter="leads" class="${listFilter === 'leads' ? 'on' : ''}">só leads</button><button data-filter="anuncio" class="${listFilter === 'anuncio' ? 'on' : ''}">anúncios</button>${listFilter ? '<button data-filter="" class="crmw-clear">✕ mostrar todas</button>' : ''}</div>
       ${empty ? '<div class="crmw-hero"><div class="crmw-hero-i">✅</div><b>Nada pendente para hoje</b><p>Marque “Retornar” ou crie lembretes na ficha do cliente que eles aparecem aqui.</p></div>' : ''}
@@ -586,16 +606,11 @@
     await saveLead({ key: lead.key, tagIds: has ? lead.tagIds.filter((t) => t !== tagId) : [...(lead.tagIds || []), tagId] });
   }
 
+  // os botões da aba Hoje usam o mesmo filtro da faixa no topo da lista de conversas (listbar.js)
+  const toBarFilter = (f) => (!f ? '' : f === 'leads' ? 'funnel' : f === 'anuncio' ? 'source:Anúncio' : f.startsWith('tag:') ? f : 'stage:' + f);
   async function applyListFilter(f) {
     if (!waReady) return toast('Aguarde o WhatsApp terminar de carregar');
-    listFilter = f;
-    const leads = Object.values(data.leads).filter((l) => l.chatId || l.phone);
-    const inF = leads.filter((l) => l.stage);
-    const pick = f === 'leads' ? inF : f === 'anuncio' ? leads.filter((l) => l.source === 'Anúncio')
-      : f?.startsWith('tag:') ? leads.filter((l) => l.tagIds?.includes(f.slice(4))) : leads.filter((l) => l.stage === f);
-    await wa('filterChats', { ids: f ? pick.map((l) => l.chatId || l.phone + '@c.us') : null }).catch((e) => toast('Não deu para filtrar: ' + e.message));
-    if (f) toast(`Lista mostrando ${pick.length} conversa(s). Toque em “mostrar todas” para voltar.`);
-    render();
+    await globalThis.CRMW.setListFilter(toBarFilter(f));
   }
 
   async function openLead(l) {
@@ -814,7 +829,7 @@
   });
   // API para toolbar.js e automation.js
   globalThis.CRMW = {
-    wa, toast, render, insertText, openKanban, findLead, ensureLead, ensureRecord, initials, toggleTag, stageOf, openLead, csvDownload, actions,
+    wa, toast, render, insertText, openKanban, showReturn, hideReturn, findLead, ensureLead, ensureRecord, initials, toggleTag, stageOf, openLead, csvDownload, actions,
     openSheet, closeSheet, confirmBox, askText, whenPicker, bindWhen, fmtWhen,
     get data() { return data; }, get chat() { return chat; }, get ready() { return waReady; }, get loaded() { return loaded; },
     on(ev, f) { listeners[ev].push(f); }, tabs: {}, fillVars: (t, ctx) => fillVars(t, ctx, data),

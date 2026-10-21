@@ -13,10 +13,13 @@
   function open(tab) {
     S.tab = tab || 'contatos';
     ov.classList.add('on');
+    W.hideReturn();
     render();
+    if (S.scroll) { const l = ov.querySelector('.cm-list'); if (l) l.scrollTop = S.scroll; S.scroll = 0; }
     if (!S.people) load();
   }
-  function close() { ov.classList.remove('on'); S.detail = null; }
+  // keep = true: só esconde (abriu uma conversa) e mantém filtro, busca, seleção e ficha aberta
+  function close(keep) { ov.classList.remove('on'); if (keep !== true) S.detail = null; }
   W.openContacts = open;
 
   // ---------- dados: agenda + conversas + fichas do CRM ----------
@@ -358,7 +361,12 @@
     });
   }
 
-  async function openChat(p) { close(); await W.openLead({ chatId: p.id, phone: p.phone, name: nameOf(p) }); }
+  async function openChat(p) {
+    S.scroll = ov.querySelector('.cm-list')?.scrollTop || 0;   // para voltar no mesmo ponto da lista
+    close(true);
+    await W.openLead({ chatId: p.id, phone: p.phone, name: nameOf(p) });
+    W.showReturn('Contatos', () => open(S.tab));
+  }
   // salvar/editar na agenda sem sair da tela de contatos
   function savePerson(p) {
     if (!W.ready) return W.toast('Aguarde o WhatsApp carregar');

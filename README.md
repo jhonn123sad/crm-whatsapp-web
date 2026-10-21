@@ -22,6 +22,8 @@
   - etiquetas, anotações que salvam sozinhas e data para retornar;
   - valor, origem, campanha e campos extras.
 - **Barra de atalhos** logo acima do campo de mensagem: pôr no funil, etiqueta, respostas, agendar, lembrar e salvar contato.
+- **Filtros na própria lista de conversas do WhatsApp:** Tudo, Funil, cada etapa (com contagem), por etiqueta e por campanha.
+- **"↩ Voltar":** depois de abrir uma conversa pela tela de Contatos ou pelo Kanban, um botão te leva de volta ao mesmo ponto (filtro, busca e rolagem).
 - **Contatos em tela cheia:**
   - mostra a agenda e quem conversa com você sem estar salvo;
   - filtros: não salvos, etapa e etiqueta;
