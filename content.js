@@ -204,10 +204,12 @@
     wallKey = key;
     let st = document.getElementById('crmw-wall-style');
     if (!st) { st = document.createElement('style'); st.id = 'crmw-wall-style'; document.head.appendChild(st); }
-    const bg = '#main [data-asset-chat-background-light], #main [data-asset-chat-background-dark]';
+    // WhatsApp atual: fundo = conversation-panel-wrapper; desenhos = camada com máscara (default_chat_wallpaper)
+    const wrap = '[data-testid="conversation-panel-wrapper"]';   // é o próprio #main
+    const doodles = '#main [data-testid^="conversation-background"], #main [data-asset-chat-background-light], #main [data-asset-chat-background-dark]';
     st.textContent = value
-      ? `${bg} { background: ${value} !important; opacity: 1 !important; }`
-      : w.hideDoodles ? `${bg} { background-image: none !important; }` : '';
+      ? `${wrap} { background: ${value} !important; } ${doodles} { display: none !important; }`
+      : w.hideDoodles ? `${doodles} { display: none !important; }` : '';
   }
   applyPrefs();
 
@@ -441,7 +443,7 @@
     const inFunnel = !!lead?.stage;
     const tagsOn = lead?.tagIds || [];
     const head = `<div class="crmw-card crmw-person"><div class="crmw-avatar" style="background:${inFunnel ? stageOf(lead.stage).color : '#94a3b8'}">${esc(initials(c.name))}</div>
-      <div class="crmw-pinfo"><b>${esc(c.name)}</b><span>${c.phone ? '+' + esc(c.phone) : 'número oculto'}${c.pushName && c.pushName !== c.name ? ' · ~' + esc(c.pushName) : ''}</span>
+      <div class="crmw-pinfo"><b>${esc(c.name)}</b><span>${/^\+?[\d\s()-]+$/.test(c.name || '') ? (c.pushName ? '~' + esc(c.pushName) + ' · ' : '') + 'não salvo na agenda' : (c.phone ? '+' + esc(c.phone) : 'número oculto') + (c.pushName && c.pushName !== c.name ? ' · ~' + esc(c.pushName) : '')}</span>
       ${tagsOn.length ? `<div class="crmw-ptags">${tagsOn.map((id) => data.tags.find((t) => t.id === id)).filter(Boolean).map((t) => `<i style="--c:${t.color}">${esc(t.name)}</i>`).join('')}</div>` : ''}</div>
       ${c.phone && c.savedName ? '<button class="crmw-icon" data-a="saveContact" title="Editar nome na agenda">✏️</button>' : ''}</div>
       ${c.phone && !c.savedName ? `<button class="crmw-wide crmw-save" data-a="saveContact">💾 Salvar na agenda do celular <small>este número ainda não está salvo</small></button>` : ''}`;
@@ -698,7 +700,10 @@
     if (waReady) wa('getTheme').then(markWa).catch(() => {});
     body.querySelectorAll('[data-wt]').forEach((b) => (b.onclick = async () => {
       if (!waReady) return toast('Aguarde o WhatsApp carregar');
-      try { markWa(await wa('setTheme', { theme: b.dataset.wt })); toast('Tema do WhatsApp: ' + b.textContent.slice(2)); } catch (e) { toast('Não deu para mudar: ' + e.message); }
+      if (b.classList.contains('on')) return;
+      // o WhatsApp grava o tema na hora, mas só redesenha a tela ao recarregar
+      if (!await confirmBox('Mudar o tema do WhatsApp?', `O WhatsApp Web vai recarregar para aplicar o tema <b>${esc(b.textContent.slice(2))}</b>. Leva poucos segundos e nada é perdido.`, 'Aplicar e recarregar')) return;
+      try { await wa('setTheme', { theme: b.dataset.wt }); location.reload(); } catch (e) { toast('Não deu para mudar: ' + e.message); }
     }));
     body.querySelectorAll('[data-wall]').forEach((b) => (b.onclick = () => setPrefs({ wall: { ...w, type: b.dataset.wall, value: b.dataset.wv } })));
     body.querySelector('#crmw-doodles').onchange = (e) => setPrefs({ wall: { ...w, hideDoodles: e.target.checked } });
