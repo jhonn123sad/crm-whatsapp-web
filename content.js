@@ -159,8 +159,16 @@
   function openKanban() {
     const f = root.querySelector('#crmw-kframe');
     if (!f.src) f.src = chrome.runtime.getURL('board.html?embed=1#funil');
+    else sendThemeToBoard();
     root.querySelector('#crmw-kanban').classList.add('on');
   }
+  // o Kanban embutido segue o mesmo tema do painel
+  function sendThemeToBoard() {
+    const f = root.querySelector('#crmw-kframe');
+    const h = document.documentElement;
+    f?.contentWindow?.postMessage({ crmw: 'theme', theme: h.dataset.crmwTheme, style: h.dataset.crmwStyle }, '*');
+  }
+  root.querySelector('#crmw-kframe').addEventListener('load', sendThemeToBoard);
   const closeKanban = () => root.querySelector('#crmw-kanban').classList.remove('on');
   root.querySelector('#crmw-kclose').onclick = closeKanban;
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeKanban(); closeSheet(); } });
@@ -170,10 +178,36 @@
   });
 
   const BLUR = ['blurMsgs', 'blurList', 'blurPreview', 'blurPhotos', 'blurHeader'];
+  // WhatsApp em modo escuro? (ele marca a página com a classe "dark")
+  const waIsDark = () => !!(document.body?.classList.contains('dark') || document.documentElement.classList.contains('dark'));
   function applyPrefs() {
     const h = document.documentElement, p = data.prefs || {};
     h.classList.toggle('crmw-open', open);
     for (const k of BLUR) h.classList.toggle('crmw-' + k, !!p[k]);
+    const theme = p.crmTheme === 'light' || p.crmTheme === 'dark' ? p.crmTheme : (waIsDark() ? 'dark' : 'light');
+    const style = p.crmStyle === 'apple' ? 'apple' : 'whatsapp';
+    if (h.dataset.crmwTheme !== theme || h.dataset.crmwStyle !== style) {
+      h.dataset.crmwTheme = theme; h.dataset.crmwStyle = style;
+      sendThemeToBoard();
+    }
+    applyWallpaper(p);
+  }
+
+  // ---------- papel de parede da conversa (só nesta tela; não muda nada na conta) ----------
+  let wallImg = null, wallKey = '';
+  async function applyWallpaper(p) {
+    const w = p.wall || { type: 'default' };
+    if (w.type === 'image' && wallImg === null) wallImg = (await CRM.store.get('wallImg')).wallImg || '';
+    const value = w.type === 'color' || w.type === 'gradient' ? w.value : w.type === 'image' && wallImg ? `center / cover no-repeat url("${wallImg}")` : '';
+    const key = JSON.stringify([w.type, w.value, w.hideDoodles, value.length]);
+    if (key === wallKey) return;
+    wallKey = key;
+    let st = document.getElementById('crmw-wall-style');
+    if (!st) { st = document.createElement('style'); st.id = 'crmw-wall-style'; document.head.appendChild(st); }
+    const bg = '#main [data-asset-chat-background-light], #main [data-asset-chat-background-dark]';
+    st.textContent = value
+      ? `${bg} { background: ${value} !important; opacity: 1 !important; }`
+      : w.hideDoodles ? `${bg} { background-image: none !important; }` : '';
   }
   applyPrefs();
 
@@ -345,7 +379,7 @@
     const badge = T.followUps.length + T.reminders.length;
     main.innerHTML = `<header class="crmw-top"><b class="crmw-logo">CRM</b><span class="crmw-sp"></span>
         <button class="crmw-btn crmw-g" id="crmw-copen" title="Todos os contatos: salvar, etiquetar, organizar">👥 Contatos</button><button class="crmw-btn" id="crmw-kopen" title="Ver todos os leads por etapa">▦ Kanban</button>
-        <button class="crmw-icon" id="crmw-help" title="Como funciona">?</button></header>
+        <button class="crmw-icon" id="crmw-theme" title="Tema do CRM: automático, claro ou escuro">${THEME_ICON[data.prefs?.crmTheme || 'auto']}</button><button class="crmw-icon" id="crmw-help" title="Como funciona">?</button></header>
       <nav class="crmw-nav">${NAV.map(([k, i, n]) => `<button data-nav="${k}" class="${view === k ? 'on' : ''}">${i} ${n}${k === 'hoje' && badge ? ` <span class="crmw-count">${badge}</span>` : ''}</button>`).join('')}</nav>
       ${waReady ? '' : '<div class="crmw-warn">⏳ Conectando ao seu WhatsApp… alguns botões liberam em instantes.</div>'}
       <div id="crmw-body"></div>
@@ -356,6 +390,12 @@
     main.querySelector('#crmw-apoiar').onclick = support;
     main.querySelector('#crmw-kopen').onclick = openKanban;
     main.querySelector('#crmw-copen').onclick = () => globalThis.CRMW.openContacts?.();
+    main.querySelector('#crmw-theme').onclick = () => {
+      const order = ['auto', 'light', 'dark'], cur = data.prefs?.crmTheme || 'auto';
+      const next = order[(order.indexOf(cur) + 1) % 3];
+      CRM.store.set({ prefs: { ...data.prefs, crmTheme: next } });
+      toast('Tema do CRM: ' + { auto: 'automático (igual ao WhatsApp)', light: 'claro', dark: 'escuro' }[next]);
+    };
     main.querySelector('#crmw-help').onclick = () => globalThis.CRMW.tour?.(true);
     main.querySelectorAll('[data-nav]').forEach((b) => (b.onclick = () => { view = b.dataset.nav; sub = null; closeSheet(); render(); }));
     const body = main.querySelector('#crmw-body');
@@ -510,7 +550,9 @@
   }
 
   // --- Ferramentas
+  const THEME_ICON = { auto: '◐', light: '☀', dark: '☾' };
   const TOOLS = [
+    ['aparencia', '🎨', 'Aparência', 'Tema claro ou escuro, estilo Apple, tema do WhatsApp e papel de parede'],
     ['contatos', '👥', 'Contatos e etiquetas', 'Salvar na agenda, etiquetar, organizar e exportar contatos'],
     ['grupos', '📇', 'Grupos', 'Grupos de contatos salvos e exportar membros de grupos do WhatsApp'],
     ['respostas', '⚡', 'Respostas rápidas', 'Mensagens prontas. Use digitando / no campo de mensagem'],
@@ -528,7 +570,7 @@
       sub = b.dataset.sub; render();
     }));
   }
-  const subTabs = { grupos: drawContacts, privacidade: drawPrivacy, link: drawLinkTool };
+  const subTabs = { aparencia: drawAppearance, grupos: drawContacts, privacidade: drawPrivacy, link: drawLinkTool };
   function drawSub(body) {
     const t = TOOLS.find((x) => x[0] === sub);
     body.innerHTML = `<button class="crmw-back">‹ Ferramentas</button><h3 class="crmw-subh">${t[1]} ${t[2]}</h3><div id="crmw-subbody"></div>`;
@@ -622,6 +664,57 @@
     }));
   }
 
+  // cores: tons de fundo do iOS (Apple HIG); degradês: coleção WebGradients
+  const WALL_COLORS = ['#ffffff', '#f2f2f7', '#e9f7ef', '#e3f2fd', '#fff8e1', '#fde7ef', '#efe8ff', '#1c1c1e', '#0b141a'];
+  const WALL_GRADIENTS = [
+    'linear-gradient(160deg, #a1c4fd 0%, #c2e9fb 100%)', 'linear-gradient(160deg, #fbc2eb 0%, #a6c1ee 100%)',
+    'linear-gradient(160deg, #84fab0 0%, #8fd3f4 100%)', 'linear-gradient(160deg, #fccb90 0%, #d57eeb 100%)',
+    'linear-gradient(160deg, #e0c3fc 0%, #8ec5fc 100%)', 'linear-gradient(160deg, #fdfbfb 0%, #ebedee 100%)',
+    'linear-gradient(160deg, #30cfd0 0%, #330867 100%)', 'linear-gradient(160deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
+  ];
+  function drawAppearance(body) {
+    const p = data.prefs || {}, w = p.wall || { type: 'default' };
+    const seg = (name, cur, opts) => `<div class="crmw-seg">${opts.map(([v, l]) => `<button data-${name}="${v}" class="${cur === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+    const sw = (type, value, title) => `<button class="crmw-wall ${w.type === type && (w.value || '') === (value || '') ? 'on' : ''}" data-wall="${type}" data-wv="${esc(value || '')}" title="${title}" style="background:${type === 'default' ? 'var(--bg2)' : value}">${type === 'default' ? '<span>padrão</span>' : ''}</button>`;
+    body.innerHTML = `<section><div class="crmw-h">Tema do CRM</div>
+        ${seg('ct', p.crmTheme || 'auto', [['auto', '◐ Automático'], ['light', '☀ Claro'], ['dark', '☾ Escuro']])}
+        <p class="crmw-mut">Automático acompanha o tema do WhatsApp.</p>
+        <div class="crmw-h">Estilo</div>
+        <div class="crmw-styles">
+          <button data-cs="whatsapp" class="${p.crmStyle !== 'apple' ? 'on' : ''}"><i style="background:#00a884"></i><b>WhatsApp</b><small>verde, igual ao app</small></button>
+          <button data-cs="apple" class="${p.crmStyle === 'apple' ? 'on' : ''}"><i style="background:#007aff"></i><b>Apple</b><small>azul do iOS, fonte do sistema</small></button></div></section>
+      <section><div class="crmw-h">Tema do WhatsApp</div>
+        ${seg('wt', '', [['system', '◐ Sistema'], ['light', '☀ Claro'], ['dark', '☾ Escuro']])}
+        <p class="crmw-mut">${waReady ? 'Muda o tema do próprio WhatsApp Web.' : 'Disponível quando o WhatsApp terminar de carregar.'}</p></section>
+      <section><div class="crmw-h">Papel de parede da conversa</div>
+        <div class="crmw-walls">${sw('default', '', 'Padrão do WhatsApp')}${WALL_COLORS.map((c) => sw('color', c, 'Cor')).join('')}${WALL_GRADIENTS.map((g) => sw('gradient', g, 'Degradê')).join('')}
+          <label class="crmw-wall crmw-wallimg ${w.type === 'image' ? 'on' : ''}" title="Imagem do computador">🖼<input type="file" accept="image/*" id="crmw-wallfile" hidden></label></div>
+        <label class="crmw-switch"><input type="checkbox" id="crmw-doodles" ${w.hideDoodles ? 'checked' : ''}><i></i><span>Esconder os desenhos do fundo padrão</span></label>
+        <p class="crmw-mut">Muda só nesta tela do computador; o celular não é afetado.</p></section>`;
+    const setPrefs = (patch) => CRM.store.set({ prefs: { ...data.prefs, ...patch } });
+    body.querySelectorAll('[data-ct]').forEach((b) => (b.onclick = () => setPrefs({ crmTheme: b.dataset.ct })));
+    body.querySelectorAll('[data-cs]').forEach((b) => (b.onclick = () => setPrefs({ crmStyle: b.dataset.cs })));
+    const markWa = (t) => body.querySelectorAll('[data-wt]').forEach((x) => x.classList.toggle('on', x.dataset.wt === t));
+    if (waReady) wa('getTheme').then(markWa).catch(() => {});
+    body.querySelectorAll('[data-wt]').forEach((b) => (b.onclick = async () => {
+      if (!waReady) return toast('Aguarde o WhatsApp carregar');
+      try { markWa(await wa('setTheme', { theme: b.dataset.wt })); toast('Tema do WhatsApp: ' + b.textContent.slice(2)); } catch (e) { toast('Não deu para mudar: ' + e.message); }
+    }));
+    body.querySelectorAll('[data-wall]').forEach((b) => (b.onclick = () => setPrefs({ wall: { ...w, type: b.dataset.wall, value: b.dataset.wv } })));
+    body.querySelector('#crmw-doodles').onchange = (e) => setPrefs({ wall: { ...w, hideDoodles: e.target.checked } });
+    body.querySelector('#crmw-wallfile').onchange = async (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      // reduz a imagem (máx. 1600 px) para não pesar no armazenamento
+      const img = await createImageBitmap(f);
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const cv = Object.assign(document.createElement('canvas'), { width: Math.round(img.width * k), height: Math.round(img.height * k) });
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      await CRM.store.set({ wallImg: cv.toDataURL('image/jpeg', 0.85) });
+      setPrefs({ wall: { ...w, type: 'image', value: '' } });
+      toast('Papel de parede aplicado');
+    };
+  }
+
   function drawPrivacy(body) {
     const p = data.prefs || {};
     const opt = (k, label) => `<label class="crmw-switch"><input type="checkbox" data-pref="${k}" ${p[k] ? 'checked' : ''}><i></i><span>${label}</span></label>`;
@@ -691,17 +784,23 @@
   function tick() {
     scheduledTick = false;
     if (!waReady) setChat(domChat());
+    applyPrefs();   // tema automático acompanha o WhatsApp
     badges();
     listeners.data.forEach((f) => f(data, 'dom'));
   }
   new MutationObserver(() => { if (!scheduledTick) { scheduledTick = true; setTimeout(tick, 400); } })
     .observe(document.body, { childList: true, subtree: true });
+  // o WhatsApp troca claro/escuro mudando a classe da página: o tema automático acompanha na hora
+  const themeWatch = new MutationObserver(() => applyPrefs());
+  themeWatch.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
   // não redesenha enquanto você digita no painel (perderia o cursor); redesenha ao sair do campo
   let pendingRender = false;
   const typing = () => main.contains(document.activeElement) && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
   main.addEventListener('focusout', () => setTimeout(() => { if (pendingRender && !typing()) { pendingRender = false; render(); } }, 50));
-  chrome.storage.onChanged.addListener(async () => {
+  chrome.storage.onChanged.addListener(async (changes) => {
+    if (changes.wallImg) { wallImg = null; wallKey = ''; }
     data = await getAll();
     applyPrefs();
     if (typing() || sheet.classList.contains('on')) pendingRender = true; else render();

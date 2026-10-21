@@ -91,6 +91,9 @@
       await WPP.contact.save(digits + '@c.us', firstName, { lastName: lastName || undefined, syncAddressBook: true });
       return true;
     },
+    // tema do próprio WhatsApp: 'light' | 'dark' | 'system'
+    async getTheme() { return WPP.conn.getTheme(); },
+    async setTheme({ theme }) { await WPP.conn.setTheme(theme); return WPP.conn.getTheme(); },
     async groups() {
       const list = await WPP.chat.list({ onlyGroups: true });
       return list.map((g) => ({ id: ser(g.id), name: g.formattedTitle || g.name || 'Grupo', size: g.groupMetadata?.participants?.length || 0 }));

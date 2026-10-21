@@ -76,20 +76,44 @@
     }
     const l = lead(), c = W.chat;
     const sig = JSON.stringify([c.key, c.savedName, l?.stage, l?.tagIds, W.data.stages, W.data.tags.length]);
-    if (el.dataset.sig === sig) return;
-    el.dataset.sig = sig;
-    const st = l?.stage ? W.stageOf(l.stage) : null;
-    const tags = (l?.tagIds || []).map((id) => W.data.tags.find((t) => t.id === id)).filter(Boolean);
-    el.innerHTML = (st
-      ? `<button data-b="stage" class="crmw-bchip" style="--c:${st.color}" title="Mudar etapa (Alt+1…${W.data.stages.length})"><i></i>${esc(st.name)} ▾</button>
-`
-      : `<button data-b="add" class="crmw-bbtn crmw-bprimary" title="Começar a acompanhar este contato no funil">+ Pôr no funil</button>`)
-      + `<button data-b="tags" class="crmw-bbtn" title="Etiquetas deste contato">🏷 ${tags.length ? tags.map((t) => `<i style="background:${t.color}"></i>`).join('') : 'Etiqueta'}</button>`
-      + `<button data-b="replies" class="crmw-bbtn" title="Respostas prontas (ou digite / no campo)">⚡ Respostas</button>
-         <button data-b="schedule" class="crmw-bbtn" title="Enviar uma mensagem depois, sozinho">⏰ Agendar</button>
-         <button data-b="remind" class="crmw-bbtn" title="Te avisar de fazer algo com este contato">🔔 Lembrar</button>
-         ${c.phone && !c.savedName ? '<button data-b="save" class="crmw-bbtn" title="Salvar na agenda do celular">💾 Salvar contato</button>' : ''}
-         <span class="crmw-bsp"></span><button data-b="panel" class="crmw-bbtn crmw-bghost" title="Abrir a ficha completa">Ficha ›</button>`;
+    if (el.dataset.sig !== sig) {
+      el.dataset.sig = sig;
+      const st = l?.stage ? W.stageOf(l.stage) : null;
+      const tags = (l?.tagIds || []).map((id) => W.data.tags.find((t) => t.id === id)).filter(Boolean);
+      // ícone + rótulo (.l); com a conversa estreita os rótulos somem e fica só o ícone (ver content.css)
+      const btn = (b, icon, label, title, cls = '') => `<button data-b="${b}" class="crmw-bbtn ${cls}" title="${title}">${icon}<span class="l">${label}</span></button>`;
+      el.innerHTML = (st
+        ? `<button data-b="stage" class="crmw-bchip" style="--c:${st.color}" title="Mudar etapa (Alt+1…${W.data.stages.length})"><i></i>${esc(st.name)} ▾</button>`
+        : `<button data-b="add" class="crmw-bbtn crmw-bprimary" title="Começar a acompanhar este contato no funil">+<span class="l">Pôr no funil</span></button>`)
+        + `<button data-b="tags" class="crmw-bbtn" title="Etiquetas deste contato">🏷${tags.length ? `<span class="dots">${tags.map((t) => `<i style="background:${t.color}"></i>`).join('')}</span>` : '<span class="l">Etiqueta</span>'}</button>`
+        + btn('replies', '⚡', 'Respostas', 'Respostas prontas (ou digite / no campo)')
+        + btn('schedule', '⏰', 'Agendar', 'Enviar uma mensagem depois, sozinho')
+        + btn('remind', '🔔', 'Lembrar', 'Te avisar de fazer algo com este contato')
+        + (c.phone && !c.savedName ? btn('save', '💾', 'Salvar', 'Salvar na agenda do celular') : '')
+        + `<span class="crmw-bsp"></span>${btn('panel', '', 'Ficha ›', 'Abrir a ficha completa', 'crmw-bghost')}`;
+    }
+    reserveSpace(el);
+  }
+
+  // a barra flutua sobre a conversa: reserva espaço no fim da lista de mensagens para não cobrir a última
+  function messageScroller() {
+    let n = document.querySelector('#main [data-id]');
+    while (n && n.id !== 'main') {
+      const oy = getComputedStyle(n).overflowY;
+      if (oy === 'auto' || oy === 'scroll') return n;   // mesmo sem rolagem: o WhatsApp encosta as mensagens embaixo
+      n = n.parentElement;
+    }
+    return null;
+  }
+  function reserveSpace(el) {
+    const sc = messageScroller();
+    if (!sc) return;
+    const need = el.offsetHeight + 12;
+    if (Number(sc.dataset.crmwPad) === need && sc.style.paddingBottom === need + 'px') return;
+    const atBottom = sc.scrollHeight - sc.scrollTop - sc.clientHeight < 60;
+    sc.style.paddingBottom = need + 'px';
+    sc.dataset.crmwPad = need;
+    if (atBottom) sc.scrollTop = sc.scrollHeight;
   }
 
   async function act(name, b) {

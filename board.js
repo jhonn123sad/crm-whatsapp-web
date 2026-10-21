@@ -6,6 +6,19 @@ let data = null;
 let qSteps = [];
 if (EMBED) document.body.classList.add('embed');
 
+// tema: embutido no WhatsApp recebe o tema do painel; em aba própria segue a preferência (ou o sistema)
+let parentTheme = null;
+function applyTheme() {
+  const p = data?.prefs || {}, h = document.documentElement;
+  const auto = parentTheme?.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  h.dataset.crmwTheme = p.crmTheme === 'light' || p.crmTheme === 'dark' ? p.crmTheme : auto;
+  h.dataset.crmwStyle = parentTheme?.style || (p.crmStyle === 'apple' ? 'apple' : 'whatsapp');
+}
+window.addEventListener('message', (e) => {
+  if (e.origin === 'https://web.whatsapp.com' && e.data?.crmw === 'theme') { parentTheme = e.data; applyTheme(); }
+});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+
 $('#fOrigem').innerHTML += SOURCES.map((s) => `<option>${s}</option>`).join('');
 function showView(v) {
   document.querySelectorAll('.tab').forEach((x) => x.classList.toggle('on', x.dataset.v === v));
@@ -194,7 +207,8 @@ $('#importJson').onchange = async (e) => {
 // não redesenha a tela de configurações enquanto você digita
 chrome.storage.onChanged.addListener(async () => {
   data = await getAll();
+  applyTheme();
   if (document.activeElement?.matches('input:not([type=checkbox]), textarea')) { document.activeElement.addEventListener('blur', render, { once: true }); return; }
   render();
 });
-getAll().then((d) => { data = d; render(); });
+getAll().then((d) => { data = d; applyTheme(); render(); });

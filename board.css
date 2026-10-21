@@ -1,7 +1,10 @@
-:root { --bg: #f0f2f5; --card: #fff; --line: #e3e6ea; --txt: #111b21; --mut: #667781; --acc: #00a884; --acc2: #e7f8f3; --ad: #c2410c; --adbg: #fff1e8; }
-@media (prefers-color-scheme: dark) { :root { --bg: #0b141a; --card: #111b21; --line: #2a3942; --txt: #e9edef; --mut: #8696a0; --acc2: #103529; --adbg: #3b2416; } }
+:root { --bg: #f0f2f5; --card: #fff; --line: #e3e6ea; --txt: #111b21; --mut: #667781; --acc: #00a884; --acc2: #e7f8f3; --ad: #c2410c; --adbg: #fff1e8; --r: 12px; --font: "Segoe UI", system-ui, sans-serif; }
+:root[data-crmw-theme=dark] { --bg: #0b141a; --card: #111b21; --line: #2a3942; --txt: #e9edef; --mut: #8696a0; --acc2: #103529; --adbg: #3b2416; }
+/* estilo Apple (cores do sistema iOS) */
+:root[data-crmw-style=apple] { --bg: #f2f2f7; --card: #fff; --line: #e5e5ea; --txt: #000; --mut: #8e8e93; --acc: #007aff; --acc2: #e5f1ff; --r: 16px; --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable", "Segoe UI", sans-serif; }
+:root[data-crmw-style=apple][data-crmw-theme=dark] { --bg: #000; --card: #1c1c1e; --line: #38383a; --txt: #fff; --mut: #98989f; --acc: #0a84ff; --acc2: #0a84ff2e; --adbg: #3b2416; }
 * { box-sizing: border-box; }
-body { margin: 0; font: 14px/1.4 "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--txt); height: 100vh; display: flex; flex-direction: column; }
+body { margin: 0; font: 14px/1.4 var(--font); background: var(--bg); color: var(--txt); height: 100vh; display: flex; flex-direction: column; }
 header { display: flex; align-items: center; gap: 14px; padding: 12px 20px; background: var(--card); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 h1 { font-size: 18px; margin: 0; }
 .tab { border: 0; background: none; padding: 7px 12px; border-radius: 8px; cursor: pointer; font: inherit; color: var(--mut); }
@@ -19,7 +22,7 @@ main { flex: 1; min-height: 0; display: flex; padding: 0 20px 16px; }
 .col h3 { font-size: 13px; margin: 0; padding: 10px 12px; display: flex; justify-content: space-between; }
 .col .cards { flex: 1; overflow-y: auto; padding: 0 8px 8px; display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
 .col.drop { outline: 2px dashed var(--acc); }
-.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px; cursor: grab; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: calc(var(--r) - 2px); padding: 10px; cursor: grab; }
 .card b { display: block; }
 .card small { display: block; color: var(--mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card .acts { display: flex; gap: 6px; margin-top: 6px; }
