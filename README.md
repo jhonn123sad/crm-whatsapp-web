@@ -141,7 +141,20 @@ A extensão não envia mensagens em massa e os robôs só respondem a quem te es
 
 Este CRM é **gratuito e de código aberto**: todos os recursos são liberados e vão continuar assim, sem versão paga e sem nada bloqueado.
 
-Se ele te ajuda e você quiser apoiar o desenvolvimento, fale com o desenvolvedor: **jhonny.alves12@gmail.com** 💚
+Se ele te ajuda e você quiser apoiar o desenvolvimento, qualquer valor via **Pix** é bem-vindo 💚
+
+<img src="docs/pix-qr.png" alt="QR Code Pix para apoiar o desenvolvedor" width="200">
+
+**Chave Pix (e-mail):** `jhonny.alves12@gmail.com`
+
+<details><summary>Pix Copia e Cola</summary>
+
+```
+00020126460014br.gov.bcb.pix0124jhonny.alves12@gmail.com5204000053039865802BR5912JHONNY ALVES6006BRASIL62070503***6304E0AF
+```
+</details>
+
+Aponte a câmera do app do seu banco para o QR. Você escolhe o valor e o dinheiro vai direto para o desenvolvedor.
 
 ## Licença
 

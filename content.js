@@ -351,7 +351,7 @@
       <div id="crmw-body"></div>
       <footer class="crmw-support"><div class="crmw-sup-card">
         <span class="crmw-sup-ic">${HEART}</span>
-        <div><b>Gostou do CRM?</b><small>É grátis e open source — tudo liberado.</small></div>
+        <div><b>Gostou do CRM?</b><small>É grátis e open source. Apoie com um Pix, se quiser.</small></div>
         <button id="crmw-apoiar">Apoiar</button></div></footer>`;
     main.querySelector('#crmw-apoiar').onclick = support;
     main.querySelector('#crmw-kopen').onclick = openKanban;
@@ -366,15 +366,24 @@
 
   // apoio voluntário: o CRM continua 100% grátis, sem nada bloqueado
   const SUPPORT_CONTACT = 'jhonny.alves12@gmail.com';
+  // Pix estático (BR Code, sem validade, valor livre): mesmo conteúdo do pix-qr.svg
+  const PIX_COPIA_E_COLA = '00020126460014br.gov.bcb.pix0124jhonny.alves12@gmail.com5204000053039865802BR5912JHONNY ALVES6006BRASIL62070503***6304E0AF';
   const HEART = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 21s-7.5-4.6-9.6-9.2C1 8.6 3 5 6.6 5c2 0 3.4 1.1 4.4 2.5C12 6.1 13.4 5 15.4 5 19 5 21 8.6 19.6 11.8 17.5 16.4 12 21 12 21z"/></svg>';
   function support() {
     openSheet('Apoiar o desenvolvedor', `<div class="crmw-sup-hero"><span class="crmw-sup-ic big">${HEART}</span>
         <div class="crmw-sup-badges"><span>✔ Grátis</span><span>✔ Open source (MIT)</span><span>✔ Todos os recursos liberados</span></div></div>
       <p>Este CRM é feito por um desenvolvedor independente e <b>continua 100% grátis</b>, com ou sem apoio. Nada é bloqueado.</p>
-      <p class="crmw-mut">Se ele te ajuda a vender mais e você quiser apoiar o desenvolvimento, é só falar com o desenvolvedor:</p>
-      <div class="crmw-sup-mail"><span>✉️</span><code class="crmw-code">${SUPPORT_CONTACT}</code><button class="crmw-btn" id="crmw-copymail">Copiar</button></div>
+      <p class="crmw-mut">Se ele te ajuda a vender mais e você quiser apoiar o desenvolvimento, qualquer valor via <b>Pix</b> é bem-vindo:</p>
+      <div class="crmw-sup-qr"><div class="crmw-qrbox" role="img" aria-label="QR Code Pix"></div>
+        <div><div class="crmw-sup-pixlabel"><span class="crmw-pix">PIX</span> Aponte a câmera do app do banco</div>
+        <p class="crmw-mut">Você escolhe o valor. O dinheiro vai direto para o desenvolvedor, sem intermediários.</p>
+        <button class="crmw-btn" id="crmw-copypix">Copiar Pix Copia e Cola</button></div></div>
+      <div class="crmw-sup-pixlabel">Ou use a chave Pix (e-mail)</div>
+      <div class="crmw-sup-mail"><code class="crmw-code">${SUPPORT_CONTACT}</code><button class="crmw-btn crmw-g" id="crmw-copymail">Copiar chave</button></div>
       <p class="crmw-mut">Sugestões e ideias de melhoria também são muito bem-vindas. Obrigado! 🙏</p>`, (s) => {
-      s.querySelector('#crmw-copymail').onclick = async () => { await navigator.clipboard.writeText(SUPPORT_CONTACT); toast('Copiado: ' + SUPPORT_CONTACT); };
+      s.querySelector('#crmw-copymail').onclick = async () => { await navigator.clipboard.writeText(SUPPORT_CONTACT); toast('Chave Pix copiada: ' + SUPPORT_CONTACT); };
+      fetch(chrome.runtime.getURL('pix-qr.svg')).then((r) => r.text()).then((svg) => { const b = s.querySelector('.crmw-qrbox'); if (b) b.innerHTML = svg; }).catch(() => {});
+      s.querySelector('#crmw-copypix').onclick = async () => { await navigator.clipboard.writeText(PIX_COPIA_E_COLA); toast('Pix Copia e Cola copiado. Cole no app do seu banco.'); };
     });
   }
 

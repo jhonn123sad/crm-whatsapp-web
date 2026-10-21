@@ -74,4 +74,5 @@ body.embed header { padding: 8px 16px; }
 .support a { text-decoration: none; border-bottom: 1px dashed currentColor; }
 .support a { color: var(--mut); }
 .support a:hover { color: #e11d48; }
+.support .pixkey { color: var(--txt); user-select: all; }
 body.embed .support { display: none; }
