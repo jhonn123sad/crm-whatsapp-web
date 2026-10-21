@@ -38,6 +38,10 @@
   - pastas e sequências de mensagens.
 - **Robôs:** só respondem a quem te escreveu. Disparam por palavra-chave, primeira mensagem do dia ou do cliente, ou fora do horário.
 - **Privacidade:** desfoca mensagens, nomes, prévias e fotos (passe o mouse para ver).
+- **Aparência:**
+  - tema do CRM claro, escuro ou automático (acompanha o WhatsApp), no estilo **WhatsApp** ou **Apple** (cores e fonte do iOS);
+  - muda o **tema do próprio WhatsApp** (claro, escuro, sistema);
+  - **papel de parede** da conversa: cores, degradês ou imagem do computador, e opção de esconder os desenhos do fundo.
 - **Atalhos de teclado:** `Alt+1…9` muda a etapa e `Esc` fecha janelas.
 - Exportar planilha e fazer backup/restaurar.
 
