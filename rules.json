@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "initiatorDomains": ["web.whatsapp.com"],
+      "requestDomains": [
+        "analytics.google.com",
+        "google-analytics.com",
+        "googletagmanager.com",
+        "wppc-linkpreview.cloudtrix.com.br",
+        "wajsapi.titanchat.com.br",
+        "cobrancas.uppermesh.com.br"
+      ]
+    }
+  }
+]

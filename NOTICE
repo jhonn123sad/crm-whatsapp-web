@@ -1,0 +1,13 @@
+CRM de Leads para WhatsApp Web
+Copyright (c) 2026 jhonn123sad e colaboradores — MIT License
+
+This product includes third-party software:
+
+WA-JS 4.7.1 (lib/wppconnect-wa.js)
+Copyright WPPConnect Team — https://github.com/wppconnect-team/wa-js
+Licensed under the Apache License, Version 2.0 (lib/LICENSE).
+Distributed unmodified. Its runtime configuration is set in wpp-config.js
+(analytics and third-party link-preview servers disabled).
+
+WhatsApp is a trademark of Meta Platforms, Inc. This project is not
+affiliated with, sponsored or endorsed by Meta.

@@ -1,0 +1,88 @@
+{
+  "manifest_version": 3,
+  "name": "CRM de Leads para WhatsApp Web",
+  "version": "4.1.0",
+  "description": "CRM simples dentro do WhatsApp Web: ficha do cliente, funil Kanban, agendar, lembrar, respostas rápidas e robôs. 100% local.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "unlimitedStorage",
+    "notifications",
+    "declarativeNetRequest"
+  ],
+  "host_permissions": [
+    "https://web.whatsapp.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "action": {
+    "default_title": "Abrir funil de leads",
+    "default_icon": "icon.png"
+  },
+  "icons": {
+    "128": "icon.png"
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "bloqueio_externo",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://web.whatsapp.com/*"
+      ],
+      "js": [
+        "wpp-config.js",
+        "lib/wppconnect-wa.js",
+        "bridge-main.js"
+      ],
+      "world": "MAIN",
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://web.whatsapp.com/*"
+      ],
+      "js": [
+        "shared.js",
+        "content.js",
+        "toolbar.js",
+        "contacts.js",
+        "automation.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "board.html",
+        "board.js",
+        "board.css",
+        "shared.js",
+        "icon.png"
+      ],
+      "matches": [
+        "https://web.whatsapp.com/*"
+      ]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "crm-leads@local",
+      "strict_min_version": "128.0"
+    }
+  }
+}

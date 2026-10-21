@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Funil de leads</title>
+<link rel="stylesheet" href="board.css">
+</head>
+<body>
+<header>
+  <h1>Funil de leads</h1>
+  <nav><button class="tab on" data-v="funil">Kanban</button><button class="tab" data-v="lista">Lista</button><button class="tab" data-v="campanhas">Campanhas</button><button class="tab" data-v="ajustes">Configurações</button></nav>
+  <span class="sp"></span>
+  <span id="totals"></span>
+</header>
+<div class="filters">
+  <input id="fBusca" placeholder="Buscar nome, número, anotação…">
+  <select id="fOrigem"><option value="">Todas as origens</option></select>
+  <select id="fCamp"><option value="">Todas as campanhas</option></select>
+  <select id="fTag"><option value="">Todas as etiquetas</option></select>
+  <select id="fPeriodo"><option value="">Qualquer data</option><option value="1">Hoje</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option></select>
+  <label class="chk"><input type="checkbox" id="fAtras"> Só retornos atrasados</label>
+</div>
+<main>
+  <section id="funil" class="view on"><div class="board" id="board"></div></section>
+  <section id="lista" class="view"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Etapa</th><th>Etiquetas</th><th>Campanha</th><th>Valor</th><th>Retorno</th><th>Entrou</th></tr></thead><tbody id="rows"></tbody></table></section>
+  <section id="campanhas" class="view">
+    <div class="cardbox wide">
+      <h2>Campanhas de anúncio</h2>
+      <p class="mut">Leads de anúncio do Facebook/Instagram entram sozinhos na campanha com o mesmo nome do anúncio. Você também pode criar campanhas e vincular leads manualmente (no painel do WhatsApp). Preencha o investimento para ver custo por lead e retorno.</p>
+      <table><thead><tr><th>Campanha</th><th>Canal</th><th>Investido (R$)</th><th>Frase do anúncio</th><th>Leads</th><th>Fechados</th><th>Conversão</th><th>Receita</th><th>Custo/lead</th><th>Retorno</th><th></th></tr></thead><tbody id="campRows"></tbody></table>
+      <div class="row"><input id="cName" placeholder="Nova campanha (ex.: Promo Outubro - Instagram)"><button class="btn" id="cAdd">Criar campanha</button></div>
+    </div>
+  </section>
+  <section id="ajustes" class="view">
+    <div class="cardbox">
+      <h2>Colunas do Kanban (etapas)</h2>
+      <div id="stageList"></div>
+      <div class="row"><input id="sName" placeholder="Nova coluna"><button class="btn" id="sAdd">Adicionar</button></div>
+    </div>
+    <div class="cardbox">
+      <h2>Etiquetas</h2>
+      <div id="tagList"></div>
+      <div class="row"><input id="tName" placeholder="Nova etiqueta"><button class="btn" id="tAdd">Adicionar</button></div>
+    </div>
+    <div class="cardbox">
+      <h2>Respostas rápidas</h2>
+      <p class="mut">No WhatsApp: digite <b>/</b> no campo de mensagem ou use ⚡ na barra da conversa. Variáveis: {nome} {primeiro_nome} {saudacao} {campanha} {telefone}. Com mensagens extras vira <b>sequência</b> (enviada automaticamente, com o intervalo escolhido, depois que você confirma).</p>
+      <div id="qrList"></div>
+      <div class="row"><input id="qFolder" placeholder="Pasta (opcional)" style="max-width:160px"><input id="qTitle" placeholder="Título (ex.: Boas-vindas)"></div>
+      <textarea id="qBody" rows="3" placeholder="Mensagem"></textarea>
+      <div id="qSteps"></div>
+      <div class="row"><button class="btn g" id="qStep">+ mensagem na sequência</button><button class="btn" id="qSave">Salvar resposta</button></div>
+    </div>
+    <div class="cardbox">
+      <h2>Campos extras do lead</h2>
+      <div id="fieldList"></div>
+      <div class="row"><input id="fName" placeholder="Ex.: Produto, Cidade, CPF/CNPJ"><button class="btn" id="fAdd">Adicionar</button></div>
+    </div>
+    <div class="cardbox">
+      <h2>Detectar lead de anúncio pela mensagem</h2>
+      <p class="mut">Reserva para quando o WhatsApp não informa o anúncio: se a primeira mensagem tiver uma destas frases, vira lead de Anúncio. Uma por linha. (Cada campanha também pode ter a sua frase.)</p>
+      <textarea id="adPhrases" rows="4"></textarea>
+      <button class="btn" id="adSave">Salvar frases</button>
+    </div>
+    <div class="cardbox">
+      <h2>Backup</h2>
+      <p class="mut">Tudo fica salvo neste navegador. Baixe um backup de vez em quando.</p>
+      <div class="row"><button class="btn" id="exportCsv">Baixar planilha de leads</button><button class="btn g" id="exportJson">Baixar backup</button><label class="btn g">Restaurar backup<input type="file" id="importJson" accept=".json" hidden></label></div>
+    </div>
+  </section>
+</main>
+<script src="shared.js"></script>
+<script src="board.js"></script>
+</body>
+</html>
