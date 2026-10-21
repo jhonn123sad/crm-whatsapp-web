@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CRM de Leads para WhatsApp Web",
-  "version": "4.3.1",
+  "version": "4.3.2",
   "description": "CRM simples dentro do WhatsApp Web: ficha do cliente, funil Kanban, agendar, lembrar, respostas rápidas e robôs. 100% local.",
   "permissions": [
     "storage",
