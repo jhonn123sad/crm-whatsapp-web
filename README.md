@@ -1,6 +1,13 @@
-# CRM de Leads para WhatsApp Web
+# CRM de Leads para WhatsApp Web — grátis e open source
 
-Extensão gratuita e de código aberto que coloca um **CRM simples dentro do WhatsApp Web**: ficha do cliente, funil Kanban, etiquetas, contatos, agendamento, lembretes, respostas rápidas e robôs de resposta.
+[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg)](LICENSE)
+[![Manifest V3](https://img.shields.io/badge/Chrome-Manifest%20V3-blue.svg)](manifest.json)
+[![Grátis](https://img.shields.io/badge/pre%C3%A7o-gr%C3%A1tis-brightgreen.svg)](#apoie-o-projeto)
+[![100% local](https://img.shields.io/badge/dados-100%25%20local-success.svg)](#privacidade-e-segurança)
+
+**Extensão gratuita e de código aberto que transforma o WhatsApp Web num CRM**: ficha do cliente, funil de vendas em Kanban, etiquetas coloridas, gerenciador de contatos, agendar mensagens, lembretes, respostas rápidas e robôs de resposta automática. Uma alternativa **grátis** a extensões pagas de CRM para WhatsApp, sem mensalidade, sem login e sem servidor.
+
+**[⬇ Baixar a versão mais recente (ZIP)](../../releases/latest)** · [Instalação](#instalação-1-minuto) · [Perguntas frequentes](#perguntas-frequentes) · [English](#english)
 
 **100% local.** Não tem servidor, não tem login e não manda nenhum dado para fora. Tudo fica salvo no seu próprio navegador.
 
@@ -42,7 +49,7 @@ Extensão gratuita e de código aberto que coloca um **CRM simples dentro do Wha
 
 Funciona no Chrome, Edge, Brave e Opera.
 
-1. Baixe este repositório: **Code → Download ZIP**. Extraia numa pasta que você não vai apagar.
+1. Baixe o ZIP da **[última versão](../../releases/latest)** (ou **Code → Download ZIP**). Extraia numa pasta que você não vai apagar.
 2. Abra `chrome://extensions` (no Edge: `edge://extensions`).
 3. Ligue o **Modo do desenvolvedor**, no canto superior direito.
 4. Clique em **Carregar sem compactação** e escolha a pasta extraída (a que tem o `manifest.json`).
@@ -97,6 +104,44 @@ Issues e pull requests são bem-vindos. Mantenha o espírito do projeto:
 - sem dependências de servidor;
 - sem disparo em massa;
 - interface simples, em português.
+
+## Perguntas frequentes
+
+**Existe CRM grátis para WhatsApp Web?**
+Sim, este. É uma extensão de navegador gratuita e de código aberto (MIT) que adiciona funil Kanban, etiquetas, contatos, agendamento e respostas rápidas ao WhatsApp Web, sem mensalidade.
+
+**Funciona com WhatsApp Business?**
+Sim. Funciona com qualquer conta aberta no WhatsApp Web (pessoal ou Business), porque roda dentro do próprio web.whatsapp.com.
+
+**Precisa de API oficial, servidor ou cadastro?**
+Não. Basta instalar a extensão e abrir o WhatsApp Web. Não tem servidor nem login, e os dados ficam no seu navegador.
+
+**Dá para agendar mensagens no WhatsApp Web?**
+Sim. Pela barra da conversa (⏰ Agendar), com atalhos como "Em 1 hora" e "Amanhã 9h". A mensagem sai sozinha com o WhatsApp Web aberto.
+
+**Como organizar contatos e etiquetas no WhatsApp?**
+No botão 👥 Contatos dá para filtrar quem não está salvo, salvar na agenda, aplicar etiquetas em vários contatos de uma vez, importar e exportar planilha.
+
+**Como acompanhar leads que vêm de anúncios do Facebook e do Instagram?**
+Leads de anúncios Click-to-WhatsApp entram sozinhos no funil já com a campanha, e a aba Campanhas mostra custo por lead e conversão.
+
+**Faz disparo em massa?**
+Não, de propósito: disparo em massa por WhatsApp Web leva ao banimento do número. Para volume, use a API oficial do WhatsApp Business.
+
+**Meu WhatsApp pode ser banido?**
+A extensão não envia mensagens em massa e os robôs só respondem a quem te escreveu, o que reduz o risco. Ainda assim é uma ferramenta não oficial, então use com moderação.
+
+## English
+
+**Free, open-source CRM for WhatsApp Web** (Chrome/Edge/Brave extension, Manifest V3). It adds a customer card next to each chat, a Kanban sales pipeline, colored labels, a full-screen contact manager (save contacts to your phone, bulk labeling, CSV import/export), scheduled messages, reminders with desktop notifications, quick replies with `/` shortcuts, keyword auto-replies and privacy blur. It automatically tracks leads from Click-to-WhatsApp ads (Meta Ads) with campaign attribution.
+
+**100% local:** no server, no account, no tracking. Data is stored in `chrome.storage.local`. Built on [WA-JS](https://github.com/wppconnect-team/wa-js), with its analytics disabled and blocked. **No bulk messaging** by design, to protect users from WhatsApp bans. UI in Brazilian Portuguese. MIT licensed.
+
+## Apoie o projeto
+
+Este CRM é **gratuito e de código aberto**: todos os recursos são liberados e vão continuar assim, sem versão paga e sem nada bloqueado.
+
+Se ele te ajuda e você quiser apoiar o desenvolvimento, fale com o desenvolvedor: **jhonny.alves12@gmail.com** 💚
 
 ## Licença
 

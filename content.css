@@ -277,3 +277,23 @@ html.crmw-blurHeader #main header:hover { filter: none; }
 .cm-del { color: #dc2626 !important; }
 .cm-modal { position: absolute; inset: 0; background: #0b141a66; display: flex; align-items: center; justify-content: center; z-index: 3; }
 .cm-mbox { width: 440px; max-width: 92vw; background: var(--bg); border-radius: 14px; padding: 16px; box-shadow: 0 12px 40px #0005; }
+
+/* rodapé de apoio (discreto) */
+#crmw-main { display: flex; flex-direction: column; }
+#crmw-body { flex: 1; }
+.crmw-support { padding: 16px 10px 4px; }
+.crmw-sup-card { display: flex; align-items: center; gap: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 9px 10px; }
+.crmw-sup-card div { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
+.crmw-sup-card b { font-size: 12.5px; }
+.crmw-sup-card small { font-size: 11px; color: var(--mut); }
+.crmw-sup-ic { width: 32px; height: 32px; border-radius: 50%; background: #ffe4e6; color: #e11d48; display: flex; align-items: center; justify-content: center; flex: none; }
+.crmw-sup-ic.big { width: 52px; height: 52px; }
+.crmw-sup-ic.big svg { width: 28px; height: 28px; }
+#crmw-apoiar { border: 1px solid #fda4af; background: #fff1f2; color: #e11d48; border-radius: 16px; padding: 5px 12px; cursor: pointer; font: inherit; font-size: 12px; font-weight: 600; flex: none; }
+#crmw-apoiar:hover { background: #e11d48; color: #fff; border-color: #e11d48; }
+.crmw-sup-hero { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 4px 0 2px; }
+.crmw-sup-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.crmw-sup-badges span { font-size: 11.5px; background: var(--acc-l); color: var(--acc-d); border-radius: 12px; padding: 2px 9px; font-weight: 600; }
+.crmw-sup-mail { display: flex; align-items: center; gap: 8px; background: var(--bg2); border-radius: 10px; padding: 8px 10px; }
+.crmw-sup-mail .crmw-code { flex: 1; background: none; padding: 0; font-size: 13.5px; user-select: all; }
+.crmw-code { font-family: inherit; }

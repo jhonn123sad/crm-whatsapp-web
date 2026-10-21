@@ -69,3 +69,9 @@ body.embed header { padding: 8px 16px; }
 .link { border: 0; background: none; color: var(--mut); text-decoration: underline; cursor: pointer; font: inherit; font-size: 12px; }
 .link:disabled { opacity: .3; cursor: default; }
 .chk input { width: auto !important; }
+.support { text-align: center; font-size: 12px; color: var(--mut); padding: 6px 20px 10px; }
+.support .sup-ic { color: #e11d48; }
+.support a { text-decoration: none; border-bottom: 1px dashed currentColor; }
+.support a { color: var(--mut); }
+.support a:hover { color: #e11d48; }
+body.embed .support { display: none; }
