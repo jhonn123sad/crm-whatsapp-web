@@ -10,6 +10,35 @@
   document.getElementById('crmw').appendChild(ov);
   ov.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (ov.querySelector('.cm-modal')) closeModal(); else close(); } e.stopPropagation(); });
 
+  // arrastar arquivo para cima da tela de Contatos: .json importa direto; .csv/.txt abre a importação preenchida.
+  // stopPropagation impede que o WhatsApp pegue o arquivo e tente anexar na conversa.
+  const hasFile = (e) => [...(e.dataTransfer?.types || [])].includes('Files');
+  for (const ev of ['dragenter', 'dragover']) ov.addEventListener(ev, (e) => { if (!hasFile(e)) return; e.preventDefault(); e.stopPropagation(); ov.classList.add('dropping'); });
+  ov.addEventListener('dragleave', (e) => { if (e.target === ov || !ov.contains(e.relatedTarget)) ov.classList.remove('dropping'); });
+  ov.addEventListener('drop', (e) => {
+    if (!hasFile(e)) return;
+    e.preventDefault(); e.stopPropagation(); ov.classList.remove('dropping');
+    handleFile(e.dataTransfer.files[0]);
+  });
+  async function handleFile(f) {
+    if (!f) return;
+    if (/\.json$/i.test(f.name)) {
+      let j;
+      try { j = JSON.parse(await f.text()); } catch { return W.toast('Esse .json não é um backup/importação do CRM'); }
+      const n = Object.keys(j.leads || {}).length;
+      if (!n) return W.toast('Esse .json não tem contatos do CRM');
+      modal('Importar contatos', `<p>Importar <b>${n} contato(s)</b> de “${esc(f.name)}”?</p><p class="crmw-mut">Tudo é mesclado com o que você já tem: nada é apagado, etiquetas e campanhas com o mesmo nome viram uma só e as anotações são somadas.</p><button class="crmw-btn" id="cm-jok">Importar</button>`, (m) => {
+        m.querySelector('#cm-jok').onclick = async () => {
+          closeModal();
+          try { await CRM.importBackup(j); W.toast(`${n} contato(s) importados`); S.people = null; load(); } catch (err) { W.toast('Não deu para importar: ' + err.message); }
+        };
+      });
+      return;
+    }
+    if (/\.(csv|txt)$/i.test(f.name)) return importModal(await f.text());
+    W.toast('Arraste um arquivo .json (backup) ou .csv (planilha)');
+  }
+
   function open(tab) {
     S.tab = tab || 'contatos';
     ov.classList.add('on');
@@ -327,16 +356,16 @@
     W.toast(`${list.length} contato(s) exportados`);
   }
 
-  function importModal() {
+  function importModal(prefill = '') {
     const D = W.data;
-    modal('Importar contatos', `<p class="crmw-mut">Cole uma lista (uma pessoa por linha: <b>Nome; Telefone</b>) ou escolha uma planilha CSV.</p>
-      <textarea id="cm-imp" rows="7" placeholder="Maria Souza; 27 99999-0000&#10;João Lima; (21) 98888-7777"></textarea>
-      <input type="file" id="cm-impf" accept=".csv,.txt">
+    modal('Importar contatos', `<p class="crmw-mut">Arraste um arquivo para cá (<b>.json</b> de backup/importação ou planilha <b>.csv</b>), cole uma lista (uma pessoa por linha: <b>Nome; Telefone</b>) ou escolha o arquivo.</p>
+      <textarea id="cm-imp" rows="7" placeholder="Maria Souza; 27 99999-0000&#10;João Lima; (21) 98888-7777">${esc(prefill)}</textarea>
+      <input type="file" id="cm-impf" accept=".csv,.txt,.json">
       <div class="crmw-2"><label>Pôr etiqueta<select id="cm-imptag"><option value="">— nenhuma —</option>${D.tags.map((t) => `<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select></label>
       <label>Funil<select id="cm-impst"><option value="">Fora do funil</option>${D.stages.map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></label></div>
       <label class="crmw-check"><input type="checkbox" id="cm-impsave"><span>Também salvar na agenda do celular</span></label>
       <button class="crmw-btn" id="cm-impok">Importar</button>`, (m) => {
-      m.querySelector('#cm-impf').onchange = async (e) => { const f = e.target.files[0]; if (f) m.querySelector('#cm-imp').value = await f.text(); };
+      m.querySelector('#cm-impf').onchange = async (e) => { const f = e.target.files[0]; if (f) handleFile(f); };
       m.querySelector('#cm-impok').onclick = async () => {
         const rows = m.querySelector('#cm-imp').value.split(/\r?\n/).map((l) => l.split(/[;,\t]/).map((x) => x.replace(/^"|"$/g, '').trim())).filter((r) => r.some(Boolean));
         const tag = m.querySelector('#cm-imptag').value, st = m.querySelector('#cm-impst').value, alsoSave = m.querySelector('#cm-impsave').checked;

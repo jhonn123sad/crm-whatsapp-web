@@ -192,46 +192,30 @@ function download(name, text, type) {
 const stamp = () => new Date().toISOString().slice(0, 10);
 $('#exportCsv').onclick = () => download(`leads-${stamp()}.csv`, toCSV(filtered(), data), 'text/csv;charset=utf-8');
 $('#exportJson').onclick = async () => download(`backup-crm-${stamp()}.json`, JSON.stringify(await store.get(null), null, 1), 'application/json');
-// junta um backup/importação com os dados atuais sem perder nada:
-// etiquetas e campanhas casam pelo nome; fichas do mesmo contato juntam etiquetas e anotações
-async function mergeBackup(cur, j) {
-  const byName = (list, item) => list.find((x) => norm(x.name) === norm(item.name));
-  const mergeList = (curList, inList) => {
-    const out = [...curList], map = {};
-    for (const it of inList || []) {
-      const same = out.find((x) => x.id === it.id) || byName(out, it);
-      if (same) map[it.id] = same.id; else { out.push(it); map[it.id] = it.id; }
-    }
-    return { out, map };
-  };
-  const tags = mergeList(cur.tags, j.tags), camps = mergeList(cur.campaigns, j.campaigns);
-  const leads = { ...cur.leads };
-  for (const l of Object.values(j.leads)) {
-    const tagIds = (l.tagIds || []).map((id) => tags.map[id] || id);
-    const campaignId = l.campaignId ? camps.map[l.campaignId] || l.campaignId : '';
-    const old = leads[l.key] || Object.values(leads).find((x) => (l.chatId && x.chatId === l.chatId) || (l.phone && x.phone === l.phone));
-    if (!old) { leads[l.key] = { ...l, tagIds, campaignId }; continue; }
-    const notes = !l.notes || (old.notes || '').includes(l.notes) ? old.notes : [old.notes, l.notes].filter(Boolean).join('\n\n');
-    leads[old.key] = { ...l, ...old, tagIds: [...new Set([...(old.tagIds || []), ...tagIds])], campaignId: old.campaignId || campaignId,
-      notes, stage: old.stage || l.stage, name: old.name || l.name, updatedAt: Date.now() };
-  }
-  const extra = {};   // listas simples do backup que ainda não existem aqui (respostas, robôs, grupos...)
-  for (const k of ['quickReplies', 'bots', 'contactGroups', 'customFields']) if (j[k]) extra[k] = mergeList(cur[k], j[k]).out;
-  return { ...extra, leads, tags: tags.out, campaigns: camps.out };
-}
-
-$('#importJson').onchange = async (e) => {
-  const f = e.target.files[0]; if (!f) return;
+async function importFile(f) {
+  if (!f) return;
+  if (!/\.json$/i.test(f.name)) return alert('Aqui vai o arquivo .json de backup/importação.\nPlanilhas (.csv) são importadas em 👥 Contatos → Importar.');
   try {
     const j = JSON.parse(await f.text());
-    if (!j.leads) throw new Error('arquivo não é um backup deste CRM');
-    const n = Object.keys(j.leads).length;
-    if (!confirm(`Importar ${n} contato(s)? Tudo é MESCLADO com o que você já tem: nada seu é apagado, etiquetas com o mesmo nome viram uma só e as anotações são somadas.`)) return;
-    await store.set(await mergeBackup(await getAll(), j));
-    alert(`${n} contato(s) importados.`);
-  } catch (err) { alert('Não deu para restaurar: ' + err.message); }
-  e.target.value = '';
-};
+    const n = Object.keys(j.leads || {}).length;
+    if (!confirm(`Importar ${n} contato(s) de "${f.name}"?\n\nTudo é MESCLADO com o que você já tem: nada seu é apagado, etiquetas e campanhas com o mesmo nome viram uma só e as anotações são somadas.`)) return;
+    await CRM.importBackup(j);
+    alert(`Pronto: ${n} contato(s) importados.`);
+  } catch (err) { alert('Não deu para importar: ' + err.message); }
+}
+$('#importJson').onchange = async (e) => { await importFile(e.target.files[0]); e.target.value = ''; };
+
+// arrastar e soltar o arquivo em qualquer lugar da tela
+let dragDepth = 0;
+const hasFile = (e) => [...(e.dataTransfer?.types || [])].includes('Files');
+document.addEventListener('dragenter', (e) => { if (!hasFile(e)) return; e.preventDefault(); dragDepth++; document.body.classList.add('dropping'); });
+document.addEventListener('dragleave', (e) => { if (!hasFile(e)) return; if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove('dropping'); } });
+document.addEventListener('dragover', (e) => { if (hasFile(e)) e.preventDefault(); });
+document.addEventListener('drop', (e) => {
+  if (!hasFile(e)) return;
+  e.preventDefault(); dragDepth = 0; document.body.classList.remove('dropping');
+  importFile(e.dataTransfer.files[0]);
+});
 
 // não redesenha a tela de configurações enquanto você digita
 chrome.storage.onChanged.addListener(async () => {

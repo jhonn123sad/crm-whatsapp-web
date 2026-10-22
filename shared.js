@@ -130,6 +130,41 @@ const CRM = (() => {
     });
   }
 
+
+  // junta um backup/importação com os dados atuais sem perder nada:
+  // etiquetas e campanhas casam pelo nome; fichas do mesmo contato juntam etiquetas e anotações
+  function mergeBackup(cur, j) {
+    const byName = (list, item) => list.find((x) => norm(x.name) === norm(item.name));
+    const mergeList = (curList, inList) => {
+      const out = [...curList], map = {};
+      for (const it of inList || []) {
+        const same = out.find((x) => x.id === it.id) || byName(out, it);
+        if (same) map[it.id] = same.id; else { out.push(it); map[it.id] = it.id; }
+      }
+      return { out, map };
+    };
+    const tags = mergeList(cur.tags, j.tags), camps = mergeList(cur.campaigns, j.campaigns);
+    const leads = { ...cur.leads };
+    for (const l of Object.values(j.leads)) {
+      const tagIds = (l.tagIds || []).map((id) => tags.map[id] || id);
+      const campaignId = l.campaignId ? camps.map[l.campaignId] || l.campaignId : '';
+      const old = leads[l.key] || Object.values(leads).find((x) => (l.chatId && x.chatId === l.chatId) || (l.phone && x.phone === l.phone));
+      if (!old) { leads[l.key] = { ...l, tagIds, campaignId }; continue; }
+      const notes = !l.notes || (old.notes || '').includes(l.notes) ? old.notes : [old.notes, l.notes].filter(Boolean).join('\n\n');
+      leads[old.key] = { ...l, ...old, tagIds: [...new Set([...(old.tagIds || []), ...tagIds])], campaignId: old.campaignId || campaignId,
+        notes, stage: old.stage || l.stage, name: old.name || l.name, updatedAt: Date.now() };
+    }
+    const extra = {};   // listas simples do backup que ainda não existem aqui (respostas, robôs, grupos...)
+    for (const k of ['quickReplies', 'bots', 'contactGroups', 'customFields']) if (j[k]) extra[k] = mergeList(cur[k], j[k]).out;
+    return { ...extra, leads, tags: tags.out, campaigns: camps.out };
+  }
+  // importa um arquivo de backup/importação mesclando com o que já existe; devolve quantos contatos vieram
+  async function importBackup(j) {
+    if (!j || !j.leads) throw new Error('o arquivo não é um backup/importação deste CRM');
+    await store.set(mergeBackup(await getAll(), j));
+    return Object.keys(j.leads).length;
+  }
+
   function toCSV(leads, data) {
     const stageName = Object.fromEntries((data?.stages || DEFAULT_STAGES).map((s) => [s.id, s.name]));
     const tagName = Object.fromEntries((data?.tags || []).map((t) => [t.id, t.name]));
@@ -144,5 +179,5 @@ const CRM = (() => {
   }
 
   return { DEFAULT_STAGES, SOURCES, COLORS, DEFAULT_AD_PHRASES, store, uid, getAll, saveLead, removeLead, newLead, newCampaign,
-    upsertItem, removeItem, norm, money, esc, leadName, fillVars, campaignStats, toCSV };
+    upsertItem, removeItem, norm, money, esc, leadName, fillVars, campaignStats, toCSV, mergeBackup, importBackup };
 })();

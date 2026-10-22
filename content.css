@@ -369,3 +369,8 @@ html.crmw-blurHeader #main header:hover { filter: none; }
 #crmw-listbar button em { font-style: normal; font-size: 11px; color: var(--mut); }
 #crmw-listbar button.on { background: color-mix(in srgb, var(--acc) 14%, transparent); border-color: var(--acc); color: var(--acc-d); font-weight: 600; }
 #crmw-listbar button.on em { color: inherit; }
+
+/* arrastar arquivo na tela de Contatos */
+#crmw-cm.dropping .cm-box { outline: 3px dashed var(--acc); outline-offset: -10px; }
+#crmw-cm.dropping .cm-box::after { content: "⬇  Solte para importar (.json ou .csv)"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 700 22px var(--font); color: var(--acc); background: color-mix(in srgb, var(--bg) 80%, transparent); pointer-events: none; z-index: 4; }
+.cm-box { position: relative; }

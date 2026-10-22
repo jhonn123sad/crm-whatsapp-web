@@ -79,3 +79,8 @@ body.embed header { padding: 8px 16px; }
 .support a:hover { color: #e11d48; }
 .support .pixkey { color: var(--txt); user-select: all; }
 body.embed .support { display: none; }
+
+/* arrastar arquivo para importar */
+body.dropping::after { content: "⬇  Solte o arquivo para importar os contatos"; position: fixed; inset: 12px; z-index: 50; display: flex; align-items: center; justify-content: center;
+  border: 3px dashed var(--acc); border-radius: 18px; background: color-mix(in srgb, var(--bg) 85%, transparent); color: var(--acc); font-size: 22px; font-weight: 700; pointer-events: none; }
+.dropzone { border: 2px dashed var(--line); border-radius: 12px; padding: 14px; text-align: center; color: var(--mut); }
