@@ -361,7 +361,7 @@ html.crmw-blurHeader #main header:hover { filter: none; }
 
 
 /* ===== filtros no topo da lista de conversas ===== */
-#crmw-listbar { position: sticky; top: 0; z-index: 5; display: flex; gap: 6px; padding: 8px 12px; overflow-x: auto; scrollbar-width: none; background: var(--bg); border-bottom: 1px solid var(--line); font: 13px var(--font); }
+#crmw-listbar { position: relative; z-index: 5; flex: none; display: flex; gap: 6px; padding: 8px 12px; overflow-x: auto; scrollbar-width: none; background: var(--bg); border-bottom: 1px solid var(--line); font: 13px var(--font); }
 #crmw-listbar::-webkit-scrollbar { display: none; }
 #crmw-listbar button { --c: var(--mut); flex: none; display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 11px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); color: var(--txt); cursor: pointer; font: inherit; white-space: nowrap; }
 #crmw-listbar button:hover { border-color: var(--acc); }

@@ -64,11 +64,12 @@
     const side = document.querySelector('#pane-side');
     let bar = document.getElementById('crmw-listbar');
     if (!side) { bar?.remove(); return; }
-    if (!bar || bar.parentElement !== side) {
+    // fora da área que rola, logo acima dela (embaixo de "Tudo / Não lidas"): dentro, o WhatsApp desenha as conversas por cima
+    if (!bar || bar.nextElementSibling !== side) {
       bar?.remove();
       bar = document.createElement('div');
       bar.id = 'crmw-listbar';
-      side.prepend(bar);                           // fica grudada no topo da lista (sticky)
+      side.parentElement.insertBefore(bar, side);
       bar.addEventListener('mousedown', (e) => e.stopPropagation());
       bar.onclick = (e) => {
         const b = e.target.closest('[data-lf]'); if (!b) return;
